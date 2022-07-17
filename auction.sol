@@ -1,9 +1,11 @@
 pragma solidity >=0.8.0 <0.9.0;
 /*
-Implements a sealed bid auction where bidders can know who they are bidding against but not the amounts of the bids.
-Users can bid after the contract is constructed until endBlock. No withdrawls can happen during endBlock but afterwards 2 things can happen:
+Implements a sealed bid auction where bidders know who they are bidding against but not the amounts of the bids.
+The creator of the contract is automatically set to be the auctioneer
+Users can start bidding after the contract is constructed and until endBlock. No withdrawls can happen during endBlock but afterwards 2 things can happen:
 1) Losing bidders can withdraw their bids
 2) The auctioneer can withdraw the winning bid
+
 The winning bidder's address is also logged after the bidding has ended
 */
 contract SealedBidAuction {
@@ -11,10 +13,11 @@ contract SealedBidAuction {
    address payable public auctioneer;
    uint public startBlock;
    uint public endBlock;
-   address public auctionWinner;
 
    // State
    bool public cancelled;
+   address private currentWinner;
+   uint256 private winningBid = 0;
 
    mapping(address => uint256) bids;
 
@@ -50,6 +53,11 @@ contract SealedBidAuction {
       _;
    }
 
+   modifier notWinner {
+       require(bids[msg.sender] != winningBid);
+       _;
+   }
+
    // Constructor
    // Begins the auction that starts at the current block and ends at endBlock_
    // Sender is assumed to be the auctioneer and must be a payable address
@@ -62,18 +70,32 @@ contract SealedBidAuction {
 
 
    function bid() public payable notCancelled inBlockRange notAuctioneer {
-      // See if user already has a bid and add their current bid to it if so
-      bids[msg.sender] += msg.value;
-
+        // Add to user's current bid (mappings default to 0 value)
+        bids[msg.sender] += msg.value;
+        if(msg.value > winningBid) {
+            currentWinner = msg.sender;
+            winningBid = msg.value;
+        }
    }
 
-   function withdrawWinningBid() public notCancelled afterEnd onlyAuctioneer {}
-   function withdraw() public cancelledOrEnded {}
+   function withdrawWinningBid() public payable notCancelled afterEnd onlyAuctioneer {
+       auctioneer.transfer(winningBid);
+       winningBid = 0;
+   }
+
+   function withdraw() public cancelledOrEnded notWinner {
+       payable(msg.sender).transfer(bids[msg.sender]);
+       bids[msg.sender] = 0;
+   }
+
    function cancelAuction() public notCancelled onlyAuctioneer inBlockRange {
       cancelled = true;
+      emit LogCanceled();
    }
 
-   function determineWinner() public notCancelled afterEnd {}
+    function queryWinner() public notCancelled afterEnd {
+        emit LogWinner(currentWinner);
+    }
 
    event LogWinner(address winner);
    event LogCanceled();
