@@ -4,7 +4,6 @@ Implements a sealed bid auction where bidders know who they are bidding against 
 The creator of the contract is automatically set to be the auctioneer
 Users can start bidding after the contract is constructed. This phase is active until revealBlock.
 Next the reveal phase begins where willing users reveal their bid amount by calling reveal(). This phase is active until endBlock. The user must submit their bid amount in ETH alongside the reveal data to be considered in the auction
-(Note that users can reveal at any time, but if they do this after endBlock they can only withdraw their bid and cannot be considered the winner)
 
 Next, both of these can happen:
 1) Losing bidders can withdraw their bids only once they reveal
@@ -69,6 +68,11 @@ contract SealedBidAuction {
       _;
    }
 
+   modifier revealPhase {
+      require(block.number < endBlock && block.number >= revealBlock, "Not in reveal phase");
+      _;
+   }
+
 
    // Constructor
    // Begins the auction that starts at the current block and ends at endBlock_
@@ -88,7 +92,7 @@ contract SealedBidAuction {
       commitments[msg.sender] = commit_hash;
    }
 
-   function reveal(uint256 bid_val, uint256 nonce) public payable notCancelled notAuctioneer {
+   function reveal(uint256 bid_val, uint256 nonce) public payable notCancelled notAuctioneer revealPhase {
       bytes32 compare = encode(bid_val, msg.sender, nonce);
       require(commitments[msg.sender] == compare, "Invalid commitment");
       require(msg.value == bid_val, "Payment does not match commited bid");
