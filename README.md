@@ -2,7 +2,7 @@
 A sealed bid auction written in solidity for the ethereum blockchain. This is/was the final project for UVIC's Blockchain Technologies class.
 
 # Running
-Sample data can be generated here (use hex mode): https://emn178.github.io/online-tools/keccak_256.html. Generate a commitment by converting your bid and nonce into 256bit hex values and concatenating them. Hash them on the site given and there ya go.
+Sample data can be generated here (use hex mode): https://emn178.github.io/online-tools/keccak_256.html. Generate a commitment by converting your bid and nonce into 256bit hex values and concatenating them. Hash them on the site given and then prepend `0x`.
 
 ## Sample Data
 
