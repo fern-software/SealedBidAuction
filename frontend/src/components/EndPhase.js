@@ -25,7 +25,7 @@ const EndPhase = ({formBid, contract, phase}) => {
 
   if(winner === null){
     return (
-      <Button variant="dark" onClick={queryWinner}>Query Winner</Button>
+      <Button variant="dark" className="w-100" onClick={queryWinner}>Query Winner</Button>
     );
   }
 
@@ -38,7 +38,7 @@ const EndPhase = ({formBid, contract, phase}) => {
 	return (
 		<div>
 			<Alert variant="dark">You lost 😭</Alert>
-			<Button variant="dark" /*onClick={withdraw}*/>Withdraw Bid</Button>
+			<Button variant="dark" className="w-100" /*onClick={withdraw}*/>Withdraw Bid</Button>
 		</div>
 	)
 }

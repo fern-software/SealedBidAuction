@@ -1,16 +1,22 @@
-import { Form, Button } from 'react-bootstrap';
+import { Form, Button, Row, Col, InputGroup } from 'react-bootstrap';
 
-const MainForm = ({onSubmit, onChange, label, submitLabel, placeholder}) => {
+const MainForm = ({onSubmit, onChange, addon, submitLabel, placeholder}) => {
 
   return (
     <Form onSubmit={onSubmit}>
-      <Form.Group md="4" className="mb-3">
-        <Form.Label>{label}</Form.Label>
-        <Form.Control type="text" placeholder={placeholder} onChange={onChange} />
-      </Form.Group>
-      <Button variant="dark" type="submit">{submitLabel}</Button>
+      <Row>
+        <Col>
+          <InputGroup>
+            <Form.Control type="text" placeholder={placeholder} onChange={onChange} />
+            {addon && <InputGroup.Text>Wei</InputGroup.Text>}
+          </InputGroup>
+        </Col>
+        <Col md={2}><Button className="w-100" variant="dark" type="submit">{submitLabel}</Button></Col>
+      </Row>
     </Form>
   );
 }
+
+// todo move buttton next to text box
 
 export default MainForm;

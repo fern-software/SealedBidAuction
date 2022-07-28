@@ -8,7 +8,7 @@ const RevealPhase = ({formBid, revealBid, phase}) => {
 				You bet {formBid} Wei. <br />
 				{phase !== Phases.reveal && "Please wait until the reveal phase to see if you bet enough 💃"}
 			</Alert>
-			{phase === Phases.reveal && <Button variant="dark" onClick={revealBid}>Reveal</Button>}
+			{phase === Phases.reveal && <Button variant="dark" className="w-100" onClick={revealBid}>Reveal</Button>}
 		</div>
 	);
 }

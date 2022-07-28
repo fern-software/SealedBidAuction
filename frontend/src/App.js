@@ -130,7 +130,6 @@ function App() {
 
           {!contract && 
             <MainForm
-              label="Auction Address"
               submitLabel="Submit"
               onSubmit={connectToContract}
               onChange={e => setProviderAddress(e.currentTarget.value)}
@@ -140,14 +139,14 @@ function App() {
           }
 
           {!connected && contract &&
-            <Button variant="dark" onClick={connectWallet}>Connect wallet</Button>
+            <Button variant="dark" className="w-100" onClick={connectWallet}>Connect wallet</Button>
           }
 
           {!hasBid && connected && contract &&
             <MainForm 
               onSubmit={bidOnContract}
               onChange={e => setFormBid(e.currentTarget.value)}
-              label="Amount to Bid (Wei)"
+              addon="Wei"
               submitLabel="Bid"
               placeholder="0"
             />
