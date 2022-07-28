@@ -17,6 +17,4 @@ const MainForm = ({onSubmit, onChange, addon, submitLabel, placeholder}) => {
   );
 }
 
-// todo move buttton next to text box
-
 export default MainForm;
