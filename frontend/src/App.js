@@ -38,12 +38,12 @@ function App() {
   const fetchCurrentBlock = async () => {
     const block = await provider.getBlockNumber();
 
-    if(contract){
-      if(block >= revealBlock){
+    if(connected){
+      if(block >= revealBlock && revealBlock > 0){
         setPhase(Phases.reveal);
       }
 
-      if(block >= endBlock){
+      if(block >= endBlock && endBlock > 0){
         setPhase(Phases.end);
       }
     }
@@ -62,17 +62,6 @@ function App() {
     if(provider){
       const signer = provider.getSigner();
       const contract = new ethers.Contract(providerAddress, abi, signer);
-
-      console.log(contract)
-      
-      const fetchBlocks = async () => {
-        const revealBlock = await contract.revealBlock();
-        const endBlock = await contract.endBlock();
-        setRevealBlock(revealBlock.toString());
-        setEndBlock(endBlock.toString());
-      }
-
-      fetchBlocks();
       
       setContract(contract);
     }
@@ -82,14 +71,24 @@ function App() {
     ethereum.request({ method: 'eth_requestAccounts'})
       .then(accounts => {
           setConnected(true);
+
+          const fetchBlocks = async () => {
+            const revealBlock = await contract.revealBlock();
+            const endBlock = await contract.endBlock();
+            setRevealBlock(revealBlock.toString());
+            setEndBlock(endBlock.toString());
+          }
+    
+          fetchBlocks();
       })
   }
 
   const bidOnContract = (e) => {
     e.preventDefault();
     if(contract && connected && !hasBid){
+      console.log('attempting bid...');
       const nonce = randomBytes(32).toString('hex').padStart(64, '0')
-      const bid = (BigNumber.from(formBid) * BigNumber.from(10).pow(18)).toString(16).padStart(64, '0')
+      const bid = (parseFloat(formBid) * BigNumber.from(10).pow(18)).toString(16).padStart(64, '0')
       const input = bid.concat(nonce)
       const commitment = '0x'.concat(createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex'))
       
@@ -110,9 +109,9 @@ function App() {
 
   const revealBid = () => {
     if(contract && connected && hasBid && !revealed){
-      console.log('Attempting to reveal ...')
-      console.log('Bid: %s', bid)
-      console.log('Nonce: %s', nonce)
+      console.log('attempting to reveal ...')
+      console.log('bid: %s', bid)
+      console.log('nonce: %s', nonce)
 
       contract.reveal(bid, nonce, {value: bid})
         .then(() => {
@@ -127,7 +126,7 @@ function App() {
       <Row className="m-auto align-self-center justify-content-center w-100">
         <Col md={8} xs={12}>
           
-          <Top contract={contract} phase={phase} revealBlock={revealBlock} endBlock={endBlock} currentBlock={currentBlock}/>
+          <Top contract={contract} connected={connected} phase={phase} revealBlock={revealBlock} endBlock={endBlock} currentBlock={currentBlock}/>
 
           {!contract && 
             <MainForm
@@ -148,7 +147,7 @@ function App() {
             <MainForm 
               onSubmit={bidOnContract}
               onChange={e => setFormBid(e.currentTarget.value)}
-              addon="Wei"
+              addon={true}
               submitLabel="Bid"
               loadingLabel="Bidding..."
               placeholder="0"

@@ -1,7 +1,7 @@
 import { Alert } from 'react-bootstrap';
 
-const Top = ({contract, phase, revealBlock, endBlock, currentBlock}) => {
-	if(contract){
+const Top = ({contract, connected, phase, revealBlock, endBlock, currentBlock}) => {
+	if(connected){
 		return (
 			<Alert variant="dark">
 				<Alert.Heading>{phase}</Alert.Heading>
@@ -15,7 +15,7 @@ const Top = ({contract, phase, revealBlock, endBlock, currentBlock}) => {
 
 	return (
 		<Alert variant="dark">
-			<Alert.Heading>Please enter the auction's address 👾</Alert.Heading>
+			<Alert.Heading>{contract ? "Please connect your wallet 🦊" : "Please enter the auction's address 👾"}</Alert.Heading>
 			<hr />
 			Current Block: {currentBlock} <br />
 		</Alert>

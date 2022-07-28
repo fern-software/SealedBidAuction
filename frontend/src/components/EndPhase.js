@@ -8,6 +8,7 @@ const EndPhase = ({formBid, contract, phase}) => {
   let [signer, setSigner] = useState(null);
 
   const queryWinner = async () => {
+    console.log('attempting to query winner...');
     const signer = await contract.signer.getAddress();
     const winner = await contract.queryWinner();
 
@@ -20,7 +21,7 @@ const EndPhase = ({formBid, contract, phase}) => {
 
 	if(phase !== Phases.end){
 		return (
-			<Alert variant="dark">You revealed {formBid} Wei. Please wait until the end phase to see if you've won 🤞</Alert>
+			<Alert variant="dark">You revealed {formBid} Eth💎. Please wait until the end phase to see if you've won 🤞</Alert>
 		);
 	}
 
