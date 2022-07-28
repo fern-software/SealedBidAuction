@@ -19,12 +19,18 @@ Commitments should be generated using the following steps. Commitments are autom
 For hashing manually you can use the [keccak256 online calculator](https://emn178.github.io/online-tools/keccak_256.html) (make sure to use hex mode).
 Make sure to prepend `0x` to the result.
 
-A sample commitment is shown below.
+2 sample commitments are shown below.
 > Bid = `55555 = 0xd903`  
 > Nonce = `12345 = 0x3039`  
 > Hex input to hash function = `000000000000000000000000000000000000000000000000000000000000d9030000000000000000000000000000000000000000000000000000000000003039`  
 > Hash (commitment) = `"0xf84f89236fa930177ba1699ceffc6b034bf6f9c191493311d0bc589f37f082e3"`  
 > Reveal data = `55555, 12345`  
+
+> Bid = `55556 = 0xd904`  
+> Nonce = `12345 = 0x3039`  
+> Hex input to hash function = `000000000000000000000000000000000000000000000000000000000000d9040000000000000000000000000000000000000000000000000000000000003039`  
+> Hash (commitment) = `"0x63c8febb3809fa6afd08d81c9973e539c5e5b866b02449547f51cc65972e4150"`  
+> Reveal data = `55556, 12345`  
 
 ### Steps
 1) Auctioneer calls the constructor, specifying the block numbers where the contract shall enter the reveal phase and end phase
