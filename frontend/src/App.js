@@ -1,10 +1,7 @@
-// This frontend is loosely based off the frontend developed in this tutorial
-// https://dev.to/ghoulkingr/create-a-dapp-with-reactjs-ethers-and-solidity-512n
-
 import { useState } from "react";
 import { ethers } from "ethers";
 import { Buffer } from "buffer/";
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 
 import MainForm from './components/MainForm.js';
 
@@ -33,6 +30,13 @@ function App() {
       let signer = provider.getSigner();
       setContract(new ethers.Contract(address, abi, signer));
     }
+  }
+
+  const connectWallet = () => {
+    ethereum.request({ method: 'eth_requestAccounts'})
+    .then(accounts => {
+        setConnected(true);
+    })
   }
 
   const bidOnContract = (e) => {
@@ -94,12 +98,7 @@ function App() {
           }
 
           {!connected && contract &&
-            <Button variant="dark" onClick={() => {
-              ethereum.request({ method: 'eth_requestAccounts'})
-                  .then(accounts => {
-                      setConnected(true);
-                  })
-            }}>Connect wallet</Button>
+            <Button variant="dark" onClick={connectWallet}>Connect wallet</Button>
           }
 
           {!hasBid && connected && contract &&
@@ -113,7 +112,14 @@ function App() {
           }
 
           {!revealed && hasBid && connected && contract &&
-            <Button variant="dark" onClick={revealBid}>Reveal</Button>
+            <div>
+              <Alert variant="dark">You bid {formBid} Wei</Alert>
+              <Button variant="dark" onClick={revealBid}>Reveal</Button>
+            </div>
+          }
+
+          {revealed && hasBid && connected && contract &&
+            <Alert variant="dark">You revealed {formBid} Wei. Please wait to be contacted to see if you've won 🤞</Alert>
           }
 
         </Col>
