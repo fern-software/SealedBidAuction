@@ -89,7 +89,7 @@ contract SealedBidAuction {
       commitments[msg.sender] = commit_hash;
    }
 
-   function reveal(uint256 bid_val, uint32 nonce) public payable notCancelled notAuctioneer revealPhase {
+   function reveal(uint256 bid_val, uint256 nonce) public payable notCancelled notAuctioneer revealPhase {
       bytes32 compare = encode(bid_val, nonce);
       require(commitments[msg.sender] == compare, "Invalid commitment");
       require(msg.value == bid_val, "Payment does not match commited bid");
