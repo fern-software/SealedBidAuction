@@ -4,9 +4,9 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 import { Buffer } from "buffer/";
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 
-import Home from './components/Home.js';
+import MainForm from './components/MainForm.js';
 
 const createKeccakHash = require('keccak')
 const abi = require('./config/abi.json')
@@ -36,23 +36,23 @@ function App() {
   }
 
   return (
-    <Container className="d-flex vh-100">
-      <Row className="m-auto align-self-center">
-        <Col>
+    <Container className="d-flex vh-100 w-100">
+      <Row className="m-auto align-self-center justify-content-center w-100">
+        <Col md={8} xs={12}>
 
-          {!contract && <Home onSubmit={onHomeSubmit} onChange={e => setAddress(e.currentTarget.value)} value={address}/>}
+          {!contract && <MainForm label="Auction Address" submitLabel="Submit" onSubmit={onHomeSubmit} onChange={e => setAddress(e.currentTarget.value)} value={address}/>}
 
           {!connected && contract &&
-            <button onClick={() => {
+            <Button variant="dark" onClick={() => {
               ethereum.request({ method: 'eth_requestAccounts'})
                   .then(accounts => {
                       setConnected(true);
                   })
-            }}>{'Connect wallet'}</button>
+            }}>Connect wallet</Button>
           }
 
           {!hasBid && connected && contract &&
-            <form onSubmit={(e) => {
+            <MainForm onSubmit={(e) => {
               e.preventDefault();
               if (contract && connected && !hasBid) {
                 const nonce = parseInt(12345, 10).toString(16).padStart(64, '0')
@@ -73,14 +73,14 @@ function App() {
                     setHasBid(true);
                   });
                 }
-            }}>
-                <input type="text" placeholder="0 wei" onChange={e => setFormBid(e.currentTarget.value)} value={formBid} />
-                <input type="submit" value="Bid" />
-            </form>
+            }}
+            onChange={e => setFormBid(e.currentTarget.value)}
+            label="Wei Amount to Bid"
+            submitLabel="Bid"/>
           }
 
           {!revealed && hasBid && connected && contract &&
-            <button onClick={() => {
+            <Button variant="dark" onClick={() => {
               if (contract && connected && hasBid && !revealed) {
                 const bid_int = parseInt(bid, 16)
                 const nonce_int = parseInt(nonce, 16)
@@ -97,7 +97,7 @@ function App() {
                     setRevealed(true);
                   });
               }
-            }}>{'Reveal'}</button>
+            }}>Reveal</Button>
           }
 
         </Col>
