@@ -2,13 +2,14 @@ import { useState } from "react";
 import { ethers } from "ethers";
 import { Buffer } from "buffer/";
 import { randomBytes } from "crypto-browserify";
-import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 import useInterval from '@use-it/interval';
 
 import MainForm from './components/MainForm.js';
 import Top from './components/Top.js';
 import Phases from './components/Phases.js';
 import RevealPhase from "./components/RevealPhase.js";
+import EndPhase from './components/EndPhase.js';
 
 const createKeccakHash = require('keccak')
 const abi = require('./config/abi.json')
@@ -23,7 +24,7 @@ function App() {
   let [connected, setConnected] = useState(false);
   let [hasBid, setHasBid] = useState(false);
   let [revealed, setRevealed] = useState(false);
-  let [address, setAddress] = useState("");
+  let [providerAddress, setProviderAddress] = useState("");
   let [contract, setContract] = useState(null);
   let [provider, setProvider] = useState(null);
   let [currentBlock, setCurrentBlock] = useState(0);
@@ -36,12 +37,14 @@ function App() {
   const fetchCurrentBlock = async () => {
     const block = await provider.getBlockNumber();
 
-    if(block >= revealBlock){
-      setPhase(Phases.reveal);
-    }
+    if(contract){
+      if(block >= revealBlock){
+        setPhase(Phases.reveal);
+      }
 
-    if(block >= endBlock){
-      setPhase(Phases.end);
+      if(block >= endBlock){
+        setPhase(Phases.end);
+      }
     }
 
     setCurrentBlock(block);
@@ -58,7 +61,7 @@ function App() {
     if(ethereum){
       const provider = new ethers.providers.Web3Provider(ethereum);
       const signer = provider.getSigner();
-      const contract = new ethers.Contract(address, abi, signer);
+      const contract = new ethers.Contract(providerAddress, abi, signer);
 
       console.log(contract)
       
@@ -78,9 +81,9 @@ function App() {
 
   const connectWallet = () => {
     ethereum.request({ method: 'eth_requestAccounts'})
-    .then(accounts => {
-        setConnected(true);
-    })
+      .then(accounts => {
+          setConnected(true);
+      })
   }
 
   const bidOnContract = (e) => {
@@ -132,8 +135,8 @@ function App() {
               label="Auction Address"
               submitLabel="Submit"
               onSubmit={connectToContract}
-              onChange={e => setAddress(e.currentTarget.value)}
-              value={address}
+              onChange={e => setProviderAddress(e.currentTarget.value)}
+              value={providerAddress}
               placeholder="0x..."
             />
           }
@@ -157,7 +160,7 @@ function App() {
           }
 
           {revealed && hasBid && connected && contract &&
-            <Alert variant="dark">You revealed {formBid} Wei. Please wait until the end phase to see if you've won 🤞</Alert>
+            <EndPhase formBid={formBid} contract={contract} phase={phase}/>
           }
 
         </Col>
