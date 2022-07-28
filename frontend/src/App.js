@@ -3,8 +3,10 @@ import { ethers } from "ethers";
 import { Buffer } from "buffer/";
 import { randomBytes } from "crypto-browserify";
 import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
+import useInterval from '@use-it/interval';
 
 import MainForm from './components/MainForm.js';
+import Top from './components/Top.js';
 
 const createKeccakHash = require('keccak')
 const abi = require('./config/abi.json')
@@ -21,15 +23,55 @@ function App() {
   let [revealed, setRevealed] = useState(false);
   let [address, setAddress] = useState("");
   let [contract, setContract] = useState(null);
+  let [provider, setProvider] = useState(null);
+  let [currentBlock, setCurrentBlock] = useState(0);
+  let [revealBlock, setRevealBlock] = useState(0);
+  let [endBlock, setEndBlock] = useState(0);
+  let [phase, setPhase] = useState("Bidding Phase 🎰");
 
   let { ethereum } = window;
+
+  const fetchCurrentBlock = async () => {
+    const block = await provider.getBlockNumber();
+    console.log('current block: %d', block)
+
+    if(currentBlock >= revealBlock){
+      setPhase('Reveal Phase 🃏');
+    }
+
+    if(currentBlock >= endBlock){
+      setPhase('End Phase 🎆');
+    }
+
+    setCurrentBlock(block);
+  }
+
+  useInterval(() => {
+    if(provider){
+      fetchCurrentBlock();
+    }
+  }, 1000);
 
   const connectToContract = (e) => {
     e.preventDefault();
     if(ethereum){
-      let provider = new ethers.providers.Web3Provider(ethereum);
-      let signer = provider.getSigner();
-      setContract(new ethers.Contract(address, abi, signer));
+      const provider = new ethers.providers.Web3Provider(ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(address, abi, signer);
+
+      console.log(contract)
+      
+      const fetchBlocks = async () => {
+        const revealBlock = await contract.revealBlock();
+        const endBlock = await contract.endBlock();
+        setRevealBlock(revealBlock.toString());
+        setEndBlock(endBlock.toString());
+      }
+
+      fetchBlocks();
+      
+      setProvider(provider);
+      setContract(contract);
     }
   }
 
@@ -86,6 +128,8 @@ function App() {
     <Container className="d-flex vh-100 w-100">
       <Row className="m-auto align-self-center justify-content-center w-100">
         <Col md={8} xs={12}>
+          
+          <Top contract={contract} phase={phase} revealBlock={revealBlock} endBlock={endBlock} currentBlock={currentBlock}/>
 
           {!contract && 
             <MainForm
