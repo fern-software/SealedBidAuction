@@ -7,6 +7,8 @@ import useInterval from '@use-it/interval';
 
 import MainForm from './components/MainForm.js';
 import Top from './components/Top.js';
+import Phases from './components/Phases.js';
+import RevealPhase from "./components/RevealPhase.js";
 
 const createKeccakHash = require('keccak')
 const abi = require('./config/abi.json')
@@ -27,20 +29,19 @@ function App() {
   let [currentBlock, setCurrentBlock] = useState(0);
   let [revealBlock, setRevealBlock] = useState(0);
   let [endBlock, setEndBlock] = useState(0);
-  let [phase, setPhase] = useState("Bidding Phase 🎰");
+  let [phase, setPhase] = useState(Phases.bidding);
 
   let { ethereum } = window;
 
   const fetchCurrentBlock = async () => {
     const block = await provider.getBlockNumber();
-    console.log('current block: %d', block)
 
-    if(currentBlock >= revealBlock){
-      setPhase('Reveal Phase 🃏');
+    if(block >= revealBlock){
+      setPhase(Phases.reveal);
     }
 
-    if(currentBlock >= endBlock){
-      setPhase('End Phase 🎆');
+    if(block >= endBlock){
+      setPhase(Phases.end);
     }
 
     setCurrentBlock(block);
@@ -98,8 +99,8 @@ function App() {
       contract.bid(commitment)
         .then(() => {
           console.log('bid successful')
-          setNonce(nonce);
-          setBid(bid);
+          setNonce('0x'.concat(nonce));
+          setBid('0x'.concat(bid));
           setHasBid(true);
         });
       }
@@ -107,16 +108,11 @@ function App() {
 
   const revealBid = () => {
     if(contract && connected && hasBid && !revealed){
-      const bid_int = parseInt(bid, 16)
-      const nonce_int = parseInt(nonce, 16)
-
       console.log('Attempting to reveal ...')
-      console.log('Bid: 0x%s', bid)
-      console.log('Nonce: 0x%s', nonce)
-      console.log('Bid (base 10): %d', bid_int)
-      console.log('Nonce (base 10): %d', nonce_int)
+      console.log('Bid: %s', bid)
+      console.log('Nonce: %s', nonce)
 
-      contract.reveal(bid_int, nonce_int, {value: bid_int})
+      contract.reveal(bid, nonce, {value: bid})
         .then(() => {
           console.log('reveal successful')
           setRevealed(true);
@@ -157,14 +153,11 @@ function App() {
           }
 
           {!revealed && hasBid && connected && contract &&
-            <div>
-              <Alert variant="dark">You bid {formBid} Wei</Alert>
-              <Button variant="dark" onClick={revealBid}>Reveal</Button>
-            </div>
+            <RevealPhase formBid={formBid} revealBid={revealBid} phase={phase}/>
           }
 
           {revealed && hasBid && connected && contract &&
-            <Alert variant="dark">You revealed {formBid} Wei. Please wait to be contacted to see if you've won 🤞</Alert>
+            <Alert variant="dark">You revealed {formBid} Wei. Please wait until the end phase to see if you've won 🤞</Alert>
           }
 
         </Col>
