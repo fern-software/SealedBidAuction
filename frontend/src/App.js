@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ethers } from "ethers";
 import { Buffer } from "buffer/";
+import { randomBytes } from "crypto-browserify";
 import { Container, Row, Col, Button, Alert } from 'react-bootstrap';
 
 import MainForm from './components/MainForm.js';
@@ -42,7 +43,7 @@ function App() {
   const bidOnContract = (e) => {
     e.preventDefault();
     if(contract && connected && !hasBid){
-      const nonce = parseInt(12345, 10).toString(16).padStart(64, '0')
+      const nonce = randomBytes(32).toString('hex').padStart(64, '0')
       const bid = parseInt(formBid, 10).toString(16).padStart(64, '0')
       const input = bid.concat(nonce)
       const commitment = '0x'.concat(createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex'))
