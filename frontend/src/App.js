@@ -26,12 +26,54 @@ function App() {
 
   let { ethereum } = window;
 
-  const onHomeSubmit = (e) => {
+  const connectToContract = (e) => {
     e.preventDefault();
-    if (ethereum) {
+    if(ethereum){
       let provider = new ethers.providers.Web3Provider(ethereum);
       let signer = provider.getSigner();
       setContract(new ethers.Contract(address, abi, signer));
+    }
+  }
+
+  const bidOnContract = (e) => {
+    e.preventDefault();
+    if(contract && connected && !hasBid){
+      const nonce = parseInt(12345, 10).toString(16).padStart(64, '0')
+      const bid = parseInt(formBid, 10).toString(16).padStart(64, '0')
+      const input = bid.concat(nonce)
+      const commitment = '0x'.concat(createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex'))
+      
+      console.log('bid: 0x' + bid)
+      console.log('nonce 0x' + nonce)
+      console.log('input: 0x' + input)
+      console.log('commitment: ' + commitment)
+
+      contract.bid(commitment)
+        .then(() => {
+          console.log('bid successful')
+          setNonce(nonce);
+          setBid(bid);
+          setHasBid(true);
+        });
+      }
+  }
+
+  const revealBid = () => {
+    if(contract && connected && hasBid && !revealed){
+      const bid_int = parseInt(bid, 16)
+      const nonce_int = parseInt(nonce, 16)
+
+      console.log('Attempting to reveal ...')
+      console.log('Bid: 0x%s', bid)
+      console.log('Nonce: 0x%s', nonce)
+      console.log('Bid (base 10): %d', bid_int)
+      console.log('Nonce (base 10): %d', nonce_int)
+
+      contract.reveal(bid_int, nonce_int, {value: bid_int})
+        .then(() => {
+          console.log('reveal successful')
+          setRevealed(true);
+        });
     }
   }
 
@@ -40,7 +82,16 @@ function App() {
       <Row className="m-auto align-self-center justify-content-center w-100">
         <Col md={8} xs={12}>
 
-          {!contract && <MainForm label="Auction Address" submitLabel="Submit" onSubmit={onHomeSubmit} onChange={e => setAddress(e.currentTarget.value)} value={address}/>}
+          {!contract && 
+            <MainForm
+              label="Auction Address"
+              submitLabel="Submit"
+              onSubmit={connectToContract}
+              onChange={e => setAddress(e.currentTarget.value)}
+              value={address}
+              placeholder="0x..."
+            />
+          }
 
           {!connected && contract &&
             <Button variant="dark" onClick={() => {
@@ -52,52 +103,17 @@ function App() {
           }
 
           {!hasBid && connected && contract &&
-            <MainForm onSubmit={(e) => {
-              e.preventDefault();
-              if (contract && connected && !hasBid) {
-                const nonce = parseInt(12345, 10).toString(16).padStart(64, '0')
-                const bid = parseInt(formBid, 10).toString(16).padStart(64, '0')
-                const input = bid.concat(nonce)
-                const commitment = '0x'.concat(createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex'))
-                
-                console.log('bid: 0x' + bid)
-                console.log('nonce 0x' + nonce)
-                console.log('input: 0x' + input)
-                console.log('commitment: ' + commitment)
-
-                contract.bid(commitment)
-                  .then(() => {
-                    console.log('bid successful')
-                    setNonce(nonce);
-                    setBid(bid);
-                    setHasBid(true);
-                  });
-                }
-            }}
-            onChange={e => setFormBid(e.currentTarget.value)}
-            label="Wei Amount to Bid"
-            submitLabel="Bid"/>
+            <MainForm 
+              onSubmit={bidOnContract}
+              onChange={e => setFormBid(e.currentTarget.value)}
+              label="Amount to Bid (Wei)"
+              submitLabel="Bid"
+              placeholder="0"
+            />
           }
 
           {!revealed && hasBid && connected && contract &&
-            <Button variant="dark" onClick={() => {
-              if (contract && connected && hasBid && !revealed) {
-                const bid_int = parseInt(bid, 16)
-                const nonce_int = parseInt(nonce, 16)
-
-                console.log('Attempting to reveal ...')
-                console.log('Bid: 0x%s', bid)
-                console.log('Nonce: 0x%s', nonce)
-                console.log('Bid (base 10): %d', bid_int)
-                console.log('Nonce (base 10): %d', nonce_int)
-
-                contract.reveal(bid_int, nonce_int, {value: bid_int})
-                  .then(() => {
-                    console.log('reveal successful')
-                    setRevealed(true);
-                  });
-              }
-            }}>Reveal</Button>
+            <Button variant="dark" onClick={revealBid}>Reveal</Button>
           }
 
         </Col>
