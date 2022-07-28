@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Alert, Button } from 'react-bootstrap';
+import { Alert } from 'react-bootstrap';
 import Phases from './Phases.js';
+import LoadingButton from './LoadingButton.js';
 
 const EndPhase = ({formBid, contract, phase}) => {
   let [winner, setWinner] = useState(null);
@@ -25,7 +26,7 @@ const EndPhase = ({formBid, contract, phase}) => {
 
   if(winner === null){
     return (
-      <Button variant="dark" className="w-100" onClick={queryWinner}>Query Winner</Button>
+      <LoadingButton label="Query Winner" loadingLabel="Querying Winner..." onClick={queryWinner}/>
     );
   }
 
@@ -38,7 +39,7 @@ const EndPhase = ({formBid, contract, phase}) => {
 	return (
 		<div>
 			<Alert variant="dark">You lost 😭</Alert>
-			<Button variant="dark" className="w-100" /*onClick={withdraw}*/>Withdraw Bid</Button>
+			<LoadingButton label="Withdraw Bid" loadingLabel="Withdrawing..." onClick={() => console.log('Withdrawing is not implemented yet.')}/>
 		</div>
 	)
 }

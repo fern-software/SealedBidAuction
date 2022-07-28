@@ -10,6 +10,7 @@ import Top from './components/Top.js';
 import Phases from './components/Phases.js';
 import RevealPhase from "./components/RevealPhase.js";
 import EndPhase from './components/EndPhase.js';
+import LoadingButton from './components/LoadingButton.js';
 
 const createKeccakHash = require('keccak')
 const abi = require('./config/abi.json')
@@ -131,6 +132,7 @@ function App() {
           {!contract && 
             <MainForm
               submitLabel="Submit"
+              loadingLabel="Submitting..."
               onSubmit={connectToContract}
               onChange={e => setProviderAddress(e.currentTarget.value)}
               value={providerAddress}
@@ -139,7 +141,7 @@ function App() {
           }
 
           {!connected && contract &&
-            <Button variant="dark" className="w-100" onClick={connectWallet}>Connect wallet</Button>
+            <LoadingButton label="Connect Wallet" loadingLabel="Connecting..." onClick={connectWallet}/>
           }
 
           {!hasBid && connected && contract &&
@@ -148,6 +150,7 @@ function App() {
               onChange={e => setFormBid(e.currentTarget.value)}
               addon="Wei"
               submitLabel="Bid"
+              loadingLabel="Bidding..."
               placeholder="0"
             />
           }
