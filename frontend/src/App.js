@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ethers, BigNumber } from "ethers";
 import { Buffer } from "buffer/";
 import { randomBytes } from "crypto-browserify";
-import { Container, Row, Col, Button } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import useInterval from '@use-it/interval';
 
 import MainForm from './components/MainForm.js';
