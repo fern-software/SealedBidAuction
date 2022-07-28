@@ -12,25 +12,31 @@ const abi = require('./config/abi.json')
 window.Buffer = window.Buffer || Buffer;
 
 function App() {
+  let [formBid, setFormBid] = useState("");
   let [bid, setBid] = useState("");
   let [nonce, setNonce] = useState("");
   let [connected, setConnected] = useState(false);
   let [hasBid, setHasBid] = useState(false);
   let [revealed, setRevealed] = useState(false);
+  let [address, setAddress] = useState("");
+  let [contract, setContract] = useState(null);
 
   let { ethereum } = window;
-  let contract = null;
-
-  if (ethereum) {
-    // This is the address of the smart contract where the auction is deployed (needs to get changed with each deployment)
-    let address = "0x04ee1A0D9E8f96219A6e65dfF36328a5BE1F5a1B";
-    let provider = new ethers.providers.Web3Provider(ethereum);
-    let signer = provider.getSigner();
-    contract = new ethers.Contract(address, abi, signer);
-  }
 
   return (
     <div className="App">
+
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        if (ethereum) {
+          let provider = new ethers.providers.Web3Provider(ethereum);
+          let signer = provider.getSigner();
+          setContract(new ethers.Contract(address, abi, signer));
+        }
+      }}>
+          <input type="text" placeholder="0x0000000000000000000000000000000000000000" onChange={e => setAddress(e.currentTarget.value)} value={address} />
+          <input type="submit" value="Connect to Auction" />
+      </form>
 
       <button onClick={() => {
           if (contract && !connected) {
@@ -44,24 +50,27 @@ function App() {
       <form onSubmit={(e) => {
         e.preventDefault();
         if (contract && connected && !hasBid) {
-          setNonce(parseInt(12345, 10).toString(16).padStart(32, '0'))
-          const hexbid = parseInt(bid, 10).toString(16).padStart(32, '0')
-          const input = hexbid.concat(nonce)
+          const nonce = parseInt(12345, 10).toString(16).padStart(64, '0')
+          const bid = parseInt(formBid, 10).toString(16).padStart(64, '0')
+          const input = bid.concat(nonce)
           const commitment = '0x'.concat(createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex'))
           
-          console.log('bid: 0x' + hexbid)
+          console.log('bid: 0x' + bid)
           console.log('nonce 0x' + nonce)
           console.log('input: 0x' + input)
           console.log('commitment: ' + commitment)
 
           contract.bid(commitment)
             .then(() => {
+              console.log('bid successful')
+              setNonce(nonce);
+              setBid(bid);
               setHasBid(true);
             });
         }
       }}>
-          <input type="text" placeholder="0 wei" onChange={e => setBid(e.currentTarget.value)} value={bid} />
-          <input type="submit" value="bid" />
+          <input type="text" placeholder="0 wei" onChange={e => setFormBid(e.currentTarget.value)} value={formBid} />
+          <input type="submit" value="Bid" />
       </form>
 
       <button onClick={() => {
@@ -70,13 +79,14 @@ function App() {
           const nonce_int = parseInt(nonce, 16)
 
           console.log('Attempting to reveal ...')
+          console.log('Bid: 0x%s', bid)
+          console.log('Nonce: 0x%s', nonce)
           console.log('Bid (base 10): %d', bid_int)
           console.log('Nonce (base 10): %d', nonce_int)
-          console.log('Bid (base 16): %s', bid)
-          console.log('Nonce (base 16): %s', nonce)
 
-          contract.reveal(bid_int, nonce_int)
+          contract.reveal(bid_int, nonce_int, {value: bid_int})
             .then(() => {
+              console.log('reveal successful')
               setRevealed(true);
             });
         }
