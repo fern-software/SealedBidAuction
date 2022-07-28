@@ -16,6 +16,8 @@ const Top = ({contract, phase, revealBlock, endBlock, currentBlock}) => {
 	return (
 		<Alert variant="dark">
 			<Alert.Heading>Please enter the auction's address 👾</Alert.Heading>
+			<hr />
+			Current Block: {currentBlock} <br />
 		</Alert>
 	);
 }

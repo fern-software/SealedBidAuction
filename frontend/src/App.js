@@ -26,13 +26,13 @@ function App() {
   let [revealed, setRevealed] = useState(false);
   let [providerAddress, setProviderAddress] = useState("");
   let [contract, setContract] = useState(null);
-  let [provider, setProvider] = useState(null);
   let [currentBlock, setCurrentBlock] = useState(0);
   let [revealBlock, setRevealBlock] = useState(0);
   let [endBlock, setEndBlock] = useState(0);
   let [phase, setPhase] = useState(Phases.bidding);
 
   let { ethereum } = window;
+  const provider = new ethers.providers.Web3Provider(ethereum);
 
   const fetchCurrentBlock = async () => {
     const block = await provider.getBlockNumber();
@@ -58,8 +58,7 @@ function App() {
 
   const connectToContract = (e) => {
     e.preventDefault();
-    if(ethereum){
-      const provider = new ethers.providers.Web3Provider(ethereum);
+    if(provider){
       const signer = provider.getSigner();
       const contract = new ethers.Contract(providerAddress, abi, signer);
 
@@ -74,7 +73,6 @@ function App() {
 
       fetchBlocks();
       
-      setProvider(provider);
       setContract(contract);
     }
   }
