@@ -7,7 +7,7 @@ const MainForm = ({onSubmit, onChange, addon, submitLabel, placeholder}) => {
       <Row>
         <Col>
           <InputGroup>
-            <Form.Control type="text" placeholder={placeholder} onChange={onChange} />
+            <Form.Control required type="text" placeholder={placeholder} onChange={onChange} />
             {addon && <InputGroup.Text>Eth💎</InputGroup.Text>}
           </InputGroup>
         </Col>
