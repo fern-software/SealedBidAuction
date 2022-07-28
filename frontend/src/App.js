@@ -11,7 +11,10 @@ const createKeccakHash = require('keccak')
 
 function App() {
   let [bid, setBid] = useState("");
+  let [nonce, setNonce] = useState("");
   let [connected, setConnected] = useState(false);
+  let [hasBid, setHasBid] = useState(false);
+  let [revealed, setRevealed] = useState(false);
 
   let { ethereum } = window;
   let contract = null;
@@ -41,9 +44,9 @@ function App() {
 
       <form onSubmit={(e) => {
         e.preventDefault();
-        if (contract && connected) {
+        if (contract && connected && !hasBid) {
+          setNonce(parseInt(12345, 10).toString(16).padStart(32, '0'))
           const hexbid = parseInt(bid, 10).toString(16).padStart(32, '0')
-          const nonce = parseInt(12345, 10).toString(16).padStart(32, '0')
           const input = hexbid.concat(nonce)
           const commitment = createKeccakHash('keccak256').update(Buffer.from(input, 'hex')).digest('hex')
           
@@ -52,15 +55,37 @@ function App() {
           console.log('hex of input: ' + input)
           console.log('commitment: ' + commitment)
 
+          // TODO: remove this line
+          setHasBid(true);
+
           contract.bid(commitment)
             .then(() => {
-              setBid(bid);
+              setHasBid(true);
             });
         }
       }}>
           <input type="text" placeholder="0 wei" onChange={e => setBid(e.currentTarget.value)} value={bid} />
           <input type="submit" value="bid" />
       </form>
+
+      <button onClick={() => {
+        if (contract && connected && hasBid && !revealed) {
+          const bid_int = parseInt(bid, 16)
+          const nonce_int = parseInt(nonce, 16)
+
+          console.log('Attempting to reveal ...')
+          console.log('Bid (base 10): %d', bid_int)
+          console.log('Nonce (base 10): %d', nonce_int)
+          console.log('Bid (base 16): %s', bid)
+          console.log('Nonce (base 16): %s', nonce)
+
+          contract.reveal(bid_int, nonce_int)
+            .then(() => {
+              setRevealed(true);
+            });
+        }
+      }}>{!revealed ? 'Reveal' : 'Revealed' }</button>
+
     </div>
   );
 }
