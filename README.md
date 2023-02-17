@@ -2,7 +2,7 @@
 A sealed bid auction written in solidity for the ethereum blockchain. This is/was the final project for UVIC's Blockchain Technologies class.
 
 ## Using the Contract
-Bidders can use a provided frontend or the contract directly whereas auctioneers will need to use the contract directly. A short demo where the bidder uses the frontend is avalaible below [here](https://www.youtube.com/watch?v=Nn9LJNpa-S8).
+Bidders can choose to use the web UI or directly interact with the contract, whereas auctioneers need to do the latter. A short demo where the bidder uses the frontend is avalaible below [here](https://www.youtube.com/watch?v=Nn9LJNpa-S8).
 
 ![demo](img/demo.gif)
 
